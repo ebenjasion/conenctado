@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Night Conectados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Monoton&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#060a20; --navy:#0d1540; --blue:#1a2766; --ink:#0a1030;
+  --gold:#ffc94a; --amber:#ff9f1c; --red:#ff3b4f; --pink:#ff4fd8; --cyan:#5ce1ff;
+  --cream:#fff4dc; --muted:#a9b3dd; --line:rgba(255,255,255,.12);
+  --card:rgba(18,28,82,.72);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--night);color:var(--cream);overflow:hidden;
+  font-family:"DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+#viewport{position:fixed;inset:0;background:#02040f}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;
+  overflow:hidden;background:radial-gradient(ellipse 120% 90% at 50% 110%,#22307a 0%,#101a4d 40%,var(--night) 75%)}
+
+/* ---------- Fondo: estrellas, luna, skyline, reflectores ---------- */
+.bg{position:absolute;inset:0;pointer-events:none}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+.moon{position:absolute;right:170px;top:90px;width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fffbea,#f3e2b0 60%,#d9c48a);
+  box-shadow:0 0 60px 18px rgba(255,236,170,.18),0 0 160px 60px rgba(255,236,170,.06)}
+.moon::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 62% 60%,rgba(0,0,0,.08) 0 10px,transparent 11px),radial-gradient(circle at 40% 70%,rgba(0,0,0,.06) 0 7px,transparent 8px),radial-gradient(circle at 55% 30%,rgba(0,0,0,.05) 0 6px,transparent 7px)}
+#skyline{position:absolute;left:0;bottom:0;width:1600px;height:320px;transition:opacity .8s}
+.win{animation:winflick 7s steps(1) infinite}
+@keyframes winflick{0%,100%{opacity:1}48%{opacity:.25}52%{opacity:1}}
+.beam{position:absolute;bottom:-40px;width:340px;height:1200px;transform-origin:50% 100%;
+  background:linear-gradient(to top,rgba(255,220,140,.16),rgba(255,220,140,0) 80%);
+  clip-path:polygon(44% 100%,56% 100%,100% 0,0 0);filter:blur(6px);mix-blend-mode:screen}
+.beam.l{left:60px;animation:sweepL 11s ease-in-out infinite}
+.beam.r{right:60px;animation:sweepR 13s ease-in-out infinite}
+@keyframes sweepL{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-8deg)}}
+@keyframes sweepR{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(8deg)}}
+body.dim #skyline{opacity:.35}
+
+/* ---------- HUD ---------- */
+.hud{position:absolute;inset:0;pointer-events:none;z-index:20}
+.onair{position:absolute;left:40px;top:34px;display:flex;align-items:center;gap:10px;
+  padding:8px 16px 6px;border:2px solid var(--red);border-radius:8px;color:var(--red);
+  font:28px/1 "Bebas Neue";letter-spacing:.12em;
+  box-shadow:0 0 18px rgba(255,59,79,.55),inset 0 0 12px rgba(255,59,79,.35);
+  text-shadow:0 0 10px rgba(255,59,79,.9);animation:onair 2.4s ease-in-out infinite}
+.onair i{width:11px;height:11px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red)}
+@keyframes onair{0%,100%{opacity:1}50%{opacity:.72}}
+.ep{position:absolute;right:40px;top:40px;font:22px/1 "Bebas Neue";letter-spacing:.18em;color:var(--muted)}
+.ep b{color:var(--gold);font-weight:400}
+.lower{position:absolute;left:40px;bottom:30px;display:flex;align-items:stretch;
+  font:20px/1 "Bebas Neue";letter-spacing:.14em;transition:opacity .4s}
+.lower .tag{background:var(--gold);color:var(--ink);padding:8px 12px 6px}
+.lower .name{background:rgba(6,10,32,.85);border:1px solid rgba(255,201,74,.4);border-left:0;padding:8px 14px 6px;color:var(--cream)}
+.count{position:absolute;right:40px;bottom:32px;font:22px/1 "Bebas Neue";letter-spacing:.14em;color:var(--muted)}
+.count b{color:var(--cream);font-weight:400}
+.navbtn{position:absolute;bottom:22px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(6,10,32,.6);color:var(--cream);font-size:20px;cursor:pointer;pointer-events:auto;opacity:0;transition:opacity .3s}
+#stage:hover .navbtn{opacity:.85}
+.navbtn:hover{background:var(--gold);color:var(--ink)}
+.navbtn.prev{right:200px}.navbtn.next{right:146px}
+#progress{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--amber),var(--gold));transition:width .5s;z-index:21}
+
+/* Letrero de aplausos */
+#applause{position:absolute;left:50%;top:26px;transform:translateX(-50%) scale(.6);opacity:0;z-index:30;
+  padding:12px 34px 8px;border:3px solid var(--red);border-radius:10px;background:#1a0208;
+  font:56px/1 "Bebas Neue";letter-spacing:.16em;color:#ff6b7a;pointer-events:none;transition:all .25s}
+#applause.on{opacity:1;transform:translateX(-50%) scale(1);animation:clap .5s steps(1) infinite}
+@keyframes clap{0%{color:#ffd1d6;text-shadow:0 0 18px #ff3b4f,0 0 40px #ff3b4f;box-shadow:0 0 40px rgba(255,59,79,.8)}50%{color:#7a1a24;text-shadow:none;box-shadow:none}}
+
+/* Ayuda */
+#help{position:absolute;inset:0;z-index:40;background:rgba(3,5,18,.86);display:none;place-items:center}
+#help.on{display:grid}
+#help div{background:var(--navy);border:1px solid var(--line);border-radius:16px;padding:40px 54px;font-size:24px;line-height:1.9}
+#help h3{font:44px/1 "Bebas Neue";letter-spacing:.08em;color:var(--gold);margin-bottom:16px}
+kbd{display:inline-block;min-width:36px;text-align:center;padding:2px 10px;border-radius:6px;background:var(--blue);border:1px solid var(--line);font:18px "DM Sans";margin-right:10px}
+
+/* ---------- Slides ---------- */
+.slide{position:absolute;inset:0;padding:120px 110px 110px;opacity:0;visibility:hidden;
+  transform:scale(.985);transition:opacity .6s ease,transform .6s ease,visibility 0s .6s;z-index:5}
+.slide.active{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease,transform .6s ease}
+.anim{opacity:0}
+.slide.active .anim{animation:rise .7s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*90ms + 150ms)}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+.head{margin-bottom:38px}
+.kicker{font:22px/1 "Bebas Neue";letter-spacing:.3em;color:var(--gold);display:flex;align-items:center;gap:14px}
+.kicker::after{content:"";height:2px;width:90px;background:linear-gradient(90deg,var(--gold),transparent)}
+.title{font:104px/.9 "Bebas Neue";letter-spacing:.02em;margin-top:10px;color:var(--cream);
+  text-shadow:0 4px 0 rgba(0,0,0,.35)}
+.title em{font-style:normal;color:var(--gold)}
+.sub{font-size:24px;color:var(--muted);margin-top:12px;max-width:1000px}
+
+/* Avatar */
+.av{border-radius:50%;display:grid;place-items:center;font:700 34px "DM Sans";color:#fff;flex:none;
+  background:var(--c,#3a4bb0);position:relative;overflow:hidden;
+  box-shadow:0 0 0 4px rgba(255,201,74,.9),0 0 0 9px rgba(255,201,74,.15),0 10px 30px rgba(0,0,0,.45)}
+.av img{width:100%;height:100%;object-fit:cover}
+
+/* 1 — Intro */
+.s-intro{display:grid;place-items:center;text-align:center;padding-top:80px}
+.marquee{position:relative;width:1120px;padding:56px 60px 50px;border-radius:26px;
+  background:linear-gradient(180deg,#1b0f2e,#120a24);border:6px solid #3a2550;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 60px rgba(255,79,216,.12)}
+.bulb{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#ffe9a8;
+  box-shadow:0 0 10px 3px rgba(255,210,110,.85);animation:chase 1.2s steps(1) infinite}
+.bulb.o{animation-delay:.6s}
+@keyframes chase{0%{opacity:1}50%{opacity:.18;box-shadow:none}}
+.neon{font:92px/1 "Monoton";color:#ffe3fb;letter-spacing:.04em;
+  text-shadow:0 0 6px #fff,0 0 14px var(--pink),0 0 32px var(--pink),0 0 64px var(--pink);animation:flicker 6s infinite}
+@keyframes flicker{0%,18%,22%,25%,53%,57%,100%{opacity:1}20%,24%,55%{opacity:.55}}
+.brand{font:200px/.85 "Bebas Neue";letter-spacing:.04em;margin-top:18px;
+  background:linear-gradient(180deg,#fff2c4 0%,var(--gold) 45%,var(--amber) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 0 #6a3a00) drop-shadow(0 18px 30px rgba(0,0,0,.5))}
+.intro-meta{display:flex;justify-content:center;gap:26px;margin-top:26px;font:28px/1 "Bebas Neue";letter-spacing:.2em;color:var(--cyan);
+  text-shadow:0 0 12px rgba(92,225,255,.6)}
+.intro-meta span+span::before{content:"★";color:var(--gold);margin-right:26px;text-shadow:none}
+.host{margin-top:38px;font-size:26px;color:var(--muted)}
+.host b{color:var(--cream);font-weight:700}
+
+/* 2 — Equipo */
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:26px 28px}
+.member{display:flex;gap:20px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+  backdrop-filter:blur(6px)}
+.member .av{width:96px;height:96px}
+.member h4{font:34px/1 "Bebas Neue";letter-spacing:.04em}
+.member p{font-size:17px;color:var(--gold);margin-top:4px;font-weight:500}
+.member small{display:block;font-size:15px;color:var(--muted);margin-top:8px;line-height:1.35}
+
+/* 3 — Agenda */
+.rundown{display:grid;grid-template-columns:1fr 1fr;gap:12px 50px;max-width:1380px}
+.cue{display:flex;align-items:center;gap:20px;padding:10px 22px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.cue .t{font:28px/1 "Bebas Neue";color:var(--cyan);letter-spacing:.06em;width:84px}
+.cue .n{font:28px/1 "Bebas Neue";width:36px;color:var(--gold)}
+.cue .l{font-size:22px;font-weight:500}
+.cue .l small{display:block;font-size:15px;color:var(--muted);font-weight:400;margin-top:2px}
+
+/* Bienvenida */
+.welcome{display:grid;grid-template-columns:1.2fr 1fr;gap:70px;align-items:center}
+.monologue p{font-size:30px;line-height:1.45}
+.monologue p+p{margin-top:18px;color:var(--muted);font-size:23px}
+.rules{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.rule{display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:18px}
+.rule b{font-size:22px;font-weight:400}
+.screen{border-radius:22px;padding:16px 18px 18px;background:#05081c;border:2px solid #2a3878;box-shadow:0 0 0 8px rgba(255,255,255,.03),0 30px 60px rgba(0,0,0,.5)}
+.screen .top{display:flex;justify-content:space-between;align-items:center;font:20px/1 "Bebas Neue";letter-spacing:.14em;color:var(--muted);margin-bottom:14px}
+.screen .top .live{color:var(--red)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{aspect-ratio:16/10;border-radius:10px;background:var(--c);display:grid;place-items:center;position:relative;font:700 30px "DM Sans";color:rgba(255,255,255,.92)}
+.tile::after{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(transparent 45%,rgba(0,0,0,.4))}
+.tile span{position:absolute;left:9px;bottom:6px;font:500 12px "DM Sans";z-index:1}
+.tile.talk{box-shadow:0 0 0 3px var(--cyan),0 0 18px rgba(92,225,255,.5)}
+.screen .cap{text-align:center;font-size:15px;color:var(--muted);margin-top:14px;letter-spacing:.04em}
+
+/* Buenas prácticas */
+.tips{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.tip{border-radius:18px;padding:28px 26px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;min-height:400px}
+.tip .ico{font-size:48px;width:88px;height:88px;border-radius:20px;display:grid;place-items:center;background:rgba(92,225,255,.1);border:1px solid rgba(92,225,255,.3);margin-bottom:22px}
+.tip .n{font:20px/1 "Bebas Neue";letter-spacing:.2em;color:var(--gold)}
+.tip h4{font:36px/1 "Bebas Neue";margin-top:6px}
+.tip p{font-size:18px;line-height:1.45;color:var(--muted);margin-top:12px;flex:1}
+.tip .tool{align-self:flex-start;margin-top:18px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(255,201,74,.14);border:1px solid rgba(255,201,74,.45);color:var(--gold)}
+
+/* Iniciativas del equipo */
+.carousel{position:relative;margin:0 -30px}
+.car-view{overflow:hidden;padding:6px 30px 22px}
+.inits{display:flex;gap:30px;transition:transform .7s cubic-bezier(.65,0,.25,1)}
+.init{flex:0 0 calc((100% - 60px)/3);border-radius:16px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:0 20px 40px rgba(0,0,0,.3);display:flex;flex-direction:column}
+.init .clap{height:30px;flex:none;background:repeating-linear-gradient(-55deg,#f2f2f2 0 22px,#14141c 22px 44px);border-bottom:3px solid #14141c}
+.init .bd{padding:18px 28px 20px;display:flex;flex-direction:column;flex:1}
+.init h4{font:42px/.95 "Bebas Neue"}
+.init p{font-size:18px;line-height:1.45;color:var(--muted);margin-top:10px;flex:1;min-height:calc(18px*1.45*6);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;overflow:hidden} /* espacio para 6 líneas (máx. 7) */
+.init .crew{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.2)}
+.init .lbl{display:flex;justify-content:space-between;font:16px/1 "Bebas Neue";letter-spacing:.16em;color:var(--muted)}
+.init .lbl b{color:var(--gold);font-weight:400}
+.init .who{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:15px;color:var(--cream)}
+.chip .av{width:28px;height:28px;font-size:12px}
+.car-btn{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;z-index:2;cursor:pointer;
+  background:rgba(14,16,40,.85);border:2px solid var(--gold);color:var(--gold);font:30px/1 "DM Sans";display:grid;place-items:center;box-shadow:0 0 20px rgba(255,201,74,.3);transition:opacity .3s}
+.car-btn.l{left:-14px}.car-btn.r{right:-14px}
+.car-btn:disabled{opacity:.15;cursor:default}
+.car-dots{display:flex;justify-content:center;gap:10px;margin-top:-6px}
+.car-dots i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
+.car-dots i.on{background:var(--gold);width:34px;border-radius:6px}
+
+/* Atributos de reconocimiento */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.legend span{padding:8px 16px 6px;border-radius:999px;border:1px solid var(--line);font:19px/1 "Bebas Neue";letter-spacing:.1em;color:rgba(169,179,221,.45)}
+.legend span.on{border-color:var(--a);color:var(--a);box-shadow:0 0 14px color-mix(in srgb,var(--a) 35%,transparent)}
+.attr{display:inline-block;margin-top:18px;padding:7px 14px 5px;border-radius:999px;font:19px/1 "Bebas Neue";letter-spacing:.1em;background:var(--a);color:var(--ink)}
+.conducta{font-size:15px;color:var(--muted);margin-top:8px}
+
+/* Q&A nuevos integrantes */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.grid3 .guest{margin-bottom:0;align-items:flex-start}
+.qa{margin-top:10px;padding:8px 12px;border-radius:10px;background:rgba(92,225,255,.08);border-left:3px solid var(--cyan)}
+.qa .q{font-size:14px;color:var(--cyan);line-height:1.3}
+.qa .r{font:700 26px/1.1 "Caveat";color:var(--cream);margin-top:2px}
+.qa .r.live{color:rgba(255,244,220,.5)}
+.logo{height:46px;vertical-align:middle;margin-right:10px}
+
+/* ---------- Telón (portada) ---------- */
+#curtain{position:absolute;inset:0;z-index:35;cursor:pointer}
+#curtain.open{pointer-events:none}
+.drape{position:absolute;top:0;bottom:0;width:812px;transition:transform 2.6s cubic-bezier(.7,0,.25,1);
+  background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 22%,transparent 75%,rgba(0,0,0,.55)),
+    repeating-linear-gradient(90deg,#4a0510 0,#8e1122 26px,#c41d33 48px,#8e1122 70px,#4a0510 96px);
+  box-shadow:inset 0 0 140px rgba(0,0,0,.55)}
+.drape::after{content:"";position:absolute;left:0;right:0;bottom:0;height:26px;
+  background:repeating-linear-gradient(90deg,#ffd36b 0 3px,#a8720f 3px 7px);box-shadow:0 -3px 0 #ffc94a}
+.drape.l{left:0;box-shadow:inset -30px 0 60px rgba(0,0,0,.6),inset 0 0 140px rgba(0,0,0,.5)}
+.drape.r{right:0;box-shadow:inset 30px 0 60px rgba(0,0,0,.6),inset 0 0 140px rgba(0,0,0,.5)}
+#curtain.open .drape.l{transform:translateX(-101%)}
+#curtain.open .drape.r{transform:translateX(101%)}
+.valance{position:absolute;left:0;right:0;top:0;height:86px;transition:transform 1.2s ease 1.6s;
+  background:linear-gradient(180deg,#3a0309,#9a1426);box-shadow:0 12px 30px rgba(0,0,0,.55);border-bottom:5px solid #ffc94a}
+.valance::after{content:"";position:absolute;left:0;right:0;top:91px;height:38px;
+  background:radial-gradient(circle at 50% 0,#9a1426 0 33px,#ffc94a 33px 37px,transparent 38px) 0 0/80px 38px repeat-x}
+#curtain.open .valance{transform:translateY(-150px)}
+.curtain-hint{position:absolute;left:0;right:0;bottom:70px;text-align:center;font:26px/1 "Bebas Neue";letter-spacing:.3em;
+  color:#ffe1a6;text-shadow:0 2px 8px rgba(0,0,0,.6);animation:onair 2s ease-in-out infinite;transition:opacity .4s}
+#curtain.open .curtain-hint{display:none}
+
+/* Portada: título */
+.s-intro .neon.the{font-size:58px}
+.s-intro .show-title{font-size:136px;margin-top:4px;white-space:nowrap;width:max-content;max-width:none;margin-left:auto;margin-right:auto;padding:0 .06em}
+.presents{margin-top:16px;font:30px/1 "Bebas Neue";letter-spacing:.32em;color:var(--cyan);text-shadow:0 0 12px rgba(92,225,255,.6)}
+
+/* ---------- Shark Tank Corporativo ---------- */
+.s-shark::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,transparent 25%,rgba(0,110,140,.22) 70%,rgba(0,140,170,.32))}
+.sea{position:absolute;left:0;right:0;bottom:0;height:120px;z-index:-1;pointer-events:none;overflow:hidden}
+.fins{position:absolute;inset:0;width:100%;height:100%}
+.fin{animation:swim linear infinite}
+@keyframes swim{from{transform:translateX(-120px)}to{transform:translateX(1720px)}}
+.wave{animation:wave 9s linear infinite}
+@keyframes wave{to{transform:translateX(-200px)}}
+.pitch{cursor:pointer;position:relative;overflow:hidden}
+.pitchno{font:16px/1 "Bebas Neue";letter-spacing:.22em;color:var(--cyan);margin-bottom:4px}
+.s-shark .guest{padding:14px 20px}
+.s-shark .guest .av{width:76px;height:76px}
+.stamp{position:absolute;right:12px;top:12px;font:20px/1 "Bebas Neue";letter-spacing:.1em;color:#7dff9a;border:3px solid #7dff9a;
+  padding:6px 10px 3px;border-radius:6px;transform:rotate(-12deg) scale(2.4);opacity:0;transition:all .35s cubic-bezier(.3,1.6,.5,1);
+  text-shadow:0 0 10px rgba(125,255,154,.5);box-shadow:0 0 14px rgba(125,255,154,.35);background:rgba(6,10,32,.6);pointer-events:none}
+.deal .stamp,.promo .stamp{opacity:1;transform:rotate(-12deg) scale(1)}
+.promo .stamp{font-size:18px;padding:4px 8px 2px;top:12px;right:12px}
+.deal{border-color:rgba(125,255,154,.5)}
+
+/* ---------- Ruleta del tiempo ---------- */
+.roulette{display:grid;grid-template-columns:430px 1fr;gap:64px;align-items:start}
+.wheel-wrap{position:relative;width:430px;height:430px;margin-top:6px}
+.s-bday .sub{font-size:20px;margin-top:8px}
+.s-bday .head{margin-bottom:18px!important}
+#wheel{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 20px 40px rgba(0,0,0,.5))}
+#wheel .rot{transition:transform 5.5s cubic-bezier(.12,.75,.12,1);transform-origin:250px 250px}
+#wheel .bl{animation:chase 1s steps(1) infinite}
+#wheel .bl.o{animation-delay:.5s}
+.pointer{position:absolute;left:50%;top:-16px;width:44px;height:56px;margin-left:-22px;z-index:2;
+  background:linear-gradient(var(--gold),var(--amber));clip-path:polygon(0 0,100% 0,50% 100%);filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+.spin{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;border:5px solid var(--cream);
+  background:radial-gradient(circle at 35% 30%,#ff7484,#c41d33);color:#fff;font:30px/1 "Bebas Neue";letter-spacing:.1em;cursor:pointer;
+  box-shadow:0 0 0 6px rgba(0,0,0,.3),0 0 30px rgba(255,59,79,.6);z-index:2;transition:transform .15s}
+.spin:hover{transform:scale(1.06)}
+.spin:disabled{filter:grayscale(.6);cursor:default;transform:none}
+.rside{display:flex;flex-direction:column;gap:16px}
+.result{border-radius:18px;padding:16px 24px;min-height:128px;background:linear-gradient(160deg,rgba(255,201,74,.18),rgba(18,28,82,.85) 60%);border:1px solid rgba(255,201,74,.5)}
+.result .lbl{font:18px/1 "Bebas Neue";letter-spacing:.24em;color:var(--gold)}
+.result h4{font:44px/1 "Bebas Neue";margin-top:6px}
+.result p{font:700 30px/1.15 "Caveat";margin-top:4px;color:var(--cream)}
+.result .idle{font-size:19px;line-height:1.4;color:var(--muted);margin-top:6px}
+.result.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.92)}to{transform:none}}
+.roulette .bdays{grid-template-columns:repeat(2,1fr);gap:8px}
+.roulette .bday{padding:6px 12px;gap:14px;border-radius:12px;transition:all .3s}
+.roulette .cal{width:52px;border-radius:8px;box-shadow:none}
+.roulette .cal .m{font-size:12px;padding:3px 0 2px}
+.roulette .cal .d{font-size:26px;padding:3px 0 1px}
+.roulette .bday h4{font-size:22px}
+.roulette .bday p{font-size:13px;margin-top:2px}
+.bday.done{opacity:.45}
+.bday.pick{opacity:1;box-shadow:0 0 0 2px var(--gold),0 0 24px rgba(255,201,74,.45)}
+
+/* ---------- Premios Late-Oscar ---------- */
+.s-oscar .carpet{position:absolute;left:50%;bottom:0;width:1000px;height:300px;transform:translateX(-50%);z-index:-1;opacity:.5;
+  background:linear-gradient(180deg,#5e0915,#b3162b);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)}
+.trophy{z-index:3}
+.env{position:absolute;inset:0;border-radius:20px;z-index:2;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:30px;overflow:hidden;color:#3a2705;transition:opacity .6s,transform .6s;
+  background:linear-gradient(160deg,#f7e3a3,#d9a93c 60%,#b8862a);box-shadow:inset 0 0 0 2px rgba(255,255,255,.45)}
+.env::before{content:"";position:absolute;top:0;left:0;right:0;height:48%;background:linear-gradient(170deg,#fcecbc,#e3b752);
+  clip-path:polygon(0 0,100% 0,50% 100%);filter:drop-shadow(0 4px 4px rgba(0,0,0,.2))}
+.env .seal{position:relative;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;margin-top:-40px;
+  background:radial-gradient(circle at 35% 35%,#e0485a,#7d0f1e);color:#ffd9a0;font:22px/1 "Bebas Neue";letter-spacing:.06em;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.env .cat{position:relative;font:18px/1 "Bebas Neue";letter-spacing:.22em;margin-top:30px}
+.env .cat b{display:block;font-size:34px;letter-spacing:.03em;margin-top:8px;font-weight:400}
+.env .tap{position:relative;margin-top:16px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.award.open .env{opacity:0;transform:translateY(-40px) rotate(-3deg);pointer-events:none}
+.award{min-height:330px}
+
+/* 4 — Notas */
+.notes{display:grid;grid-template-columns:repeat(4,1fr);gap:34px;margin-top:20px}
+.note{background:#fdf8ea;color:#26304f;border-radius:4px;padding:30px 26px 34px;min-height:330px;
+  box-shadow:0 18px 40px rgba(0,0,0,.45);position:relative;transform:rotate(var(--r,0deg));
+  background-image:repeating-linear-gradient(transparent 0 37px,#c6d5ef 37px 38px);background-position:0 22px}
+.note::before{content:"";position:absolute;top:-14px;left:50%;width:110px;height:30px;margin-left:-55px;background:rgba(255,226,140,.75);transform:rotate(-3deg)}
+.note .to{font:700 34px/1.05 "Caveat";color:#b8323f;margin-bottom:18px}
+.note .tx{font:500 30px/1.27 "Caveat"}
+
+/* 5 — Emojis */
+.emoji-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:10px}
+.flip{perspective:1200px;height:400px;cursor:pointer}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:20px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center}
+.face.front{background:linear-gradient(160deg,#25358a,#141e57);border:2px solid rgba(92,225,255,.35);box-shadow:0 0 30px rgba(92,225,255,.12)}
+.face.back{background:linear-gradient(160deg,var(--gold),var(--amber));color:var(--ink);transform:rotateY(180deg)}
+.face .num{position:absolute;top:18px;left:22px;font:26px "Bebas Neue";color:var(--cyan);letter-spacing:.1em}
+.face .emo{font-size:76px;line-height:1.25;letter-spacing:.06em}
+.face .hint{position:absolute;bottom:20px;font-size:15px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.face.back .ans{font:52px/1 "Bebas Neue";letter-spacing:.02em}
+.face.back .num{color:rgba(10,16,48,.6)}
+
+/* 6 — Nuevos & ascensos */
+.two{display:grid;grid-template-columns:1.15fr 1fr;gap:50px}
+.colh{font:34px/1 "Bebas Neue";letter-spacing:.12em;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.colh i{display:inline-block;width:12px;height:12px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor}
+.guest{display:flex;align-items:center;gap:22px;padding:18px 22px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:16px}
+.guest .av{width:88px;height:88px}
+.guest h4{font:36px/1 "Bebas Neue";letter-spacing:.03em}
+.guest p{font-size:19px;color:var(--gold);margin-top:3px;font-weight:500}
+.guest small{display:block;font-size:16px;color:var(--muted);margin-top:4px}
+.promo .path{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:18px;flex-wrap:wrap}
+.promo .from{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.3)}
+.promo .arrow{color:var(--gold);font-weight:700}
+.promo .to{color:var(--cream);font-weight:700;background:rgba(255,201,74,.16);border:1px solid rgba(255,201,74,.45);border-radius:999px;padding:3px 12px}
+
+/* 7 — Aniversarios */
+.walk{display:flex;justify-content:center;gap:34px;flex-wrap:wrap;margin-top:10px}
+.fame{width:240px;text-align:center}
+.fame .st{position:relative;width:220px;height:210px;margin:0 auto}
+.fame svg{position:absolute;inset:0;filter:drop-shadow(0 10px 22px rgba(0,0,0,.5))}
+.fame .yrs{position:absolute;inset:0;display:grid;place-items:center;padding-top:22px;line-height:.8}
+.fame .yrs b{font:72px/.8 "Bebas Neue";color:var(--ink);display:block}
+.fame .yrs span{font:20px/1 "Bebas Neue";letter-spacing:.2em;color:#5a3a00;display:block;margin-top:4px}
+.fame h4{font:32px/1 "Bebas Neue";letter-spacing:.04em;margin-top:16px}
+.fame p{font-size:16px;color:var(--muted);margin-top:4px}
+
+/* 8 — Cumpleaños */
+.bdays{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.bday{display:flex;gap:18px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.cal{width:96px;flex:none;border-radius:12px;overflow:hidden;background:#fff;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.cal .m{background:var(--red);color:#fff;font:20px/1 "Bebas Neue";letter-spacing:.18em;padding:7px 0 5px}
+.cal .d{color:var(--ink);font:58px/1 "Bebas Neue";padding:8px 0 4px}
+.bday h4{font:30px/1.02 "Bebas Neue";letter-spacing:.03em}
+.bday p{font-size:16px;color:var(--muted);margin-top:5px}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.confetti i{position:absolute;top:-30px;width:10px;height:16px;border-radius:2px;opacity:.85;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(980px) rotate(720deg)}}
+
+/* 9 — Noticias */
+.newsdesk{display:grid;grid-template-columns:1.35fr 1fr;gap:34px;height:440px}
+.lead{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(160deg,#1f2d7a,#0c143f);border:1px solid var(--line);display:flex;flex-direction:column}
+.lead .img{flex:1;position:relative;background:
+  radial-gradient(circle at 30% 40%,rgba(92,225,255,.25),transparent 50%),
+  radial-gradient(circle at 75% 70%,rgba(255,79,216,.2),transparent 50%),
+  repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 12px,transparent 12px 24px),#121b54;
+  display:grid;place-items:center;color:rgba(255,255,255,.35);font-size:18px;letter-spacing:.1em;text-transform:uppercase}
+.lead .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lead .txt{padding:26px 30px 28px;background:rgba(6,10,32,.85)}
+.breaking{display:inline-block;background:var(--red);color:#fff;font:22px/1 "Bebas Neue";letter-spacing:.14em;padding:7px 12px 5px;margin-bottom:12px}
+.lead h3{font:46px/.98 "Bebas Neue";letter-spacing:.01em}
+.lead p{font-size:18px;color:var(--muted);margin-top:8px;line-height:1.4}
+.lead .txt{padding:20px 28px 22px}
+.side{display:flex;flex-direction:column;gap:14px}
+.story{flex:1;border-radius:16px;background:var(--card);border:1px solid var(--line);padding:12px 22px;display:flex;flex-direction:column;justify-content:center}
+.story .cat{font:18px/1 "Bebas Neue";letter-spacing:.2em;color:var(--cyan)}
+.story h4{font:32px/1 "Bebas Neue";letter-spacing:.02em;margin-top:6px}
+.story p{font-size:16px;color:var(--muted);margin-top:6px;line-height:1.35}
+.src{font-size:13px;color:rgba(169,179,221,.7);margin-top:8px;letter-spacing:.04em}
+.ticker{position:absolute;left:0;right:0;bottom:80px;height:48px;display:flex;background:rgba(6,10,32,.92);border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);overflow:hidden}
+.ticker .lbl{flex:none;background:var(--gold);color:var(--ink);font:26px/48px "Bebas Neue";letter-spacing:.14em;padding:0 22px;z-index:1}
+.ticker .run{display:flex;white-space:nowrap;animation:tick 40s linear infinite;font:24px/48px "Bebas Neue";letter-spacing:.08em}
+.ticker .run span{padding:0 34px}
+.ticker .run span::before{content:"◆";color:var(--gold);margin-right:34px;font-size:16px}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* 10 — HA */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-bottom:26px}
+.kpi{border-radius:16px;padding:18px 24px;background:var(--card);border:1px solid var(--line)}
+.kpi b{display:block;font:62px/1 "Bebas Neue";color:var(--gold)}
+.kpi span{font-size:17px;color:var(--muted)}
+.ha-list{display:flex;flex-direction:column;gap:12px}
+.ha{display:grid;grid-template-columns:1.4fr 1.5fr 1fr 150px;align-items:center;gap:28px;padding:16px 24px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.ha h4{font:30px/1 "Bebas Neue";letter-spacing:.03em}
+.ha small{display:block;font-size:15px;color:var(--muted);margin-top:4px}
+.pipe{display:flex;align-items:flex-start}
+.pipe .stp{flex:1;text-align:center;position:relative;font-size:13px;color:var(--muted);letter-spacing:.02em}
+.pipe .stp::before{content:"";display:block;width:16px;height:16px;border-radius:50%;margin:0 auto 6px;background:#2a376f;border:2px solid #3f4d8c;position:relative;z-index:1}
+.pipe .stp::after{content:"";position:absolute;top:8px;left:-50%;width:100%;height:2px;background:#3f4d8c}
+.pipe .stp:first-child::after{display:none}
+.pipe .stp.done::before{background:var(--gold);border-color:var(--gold)}
+.pipe .stp.done::after{background:var(--gold)}
+.pipe .stp.cur::before{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.pipe .stp.cur::after{background:var(--gold)}
+.pipe .stp.cur{color:var(--cream);font-weight:700}
+.bar{height:12px;border-radius:999px;background:#25316a;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--amber),var(--gold));width:0;transition:width 1.2s cubic-bezier(.2,.7,.2,1) .5s}
+.barlbl{font-size:15px;color:var(--muted);margin-top:6px}
+.save{text-align:right}
+.save b{font:36px/1 "Bebas Neue";color:var(--cyan)}
+.save span{display:block;font-size:13px;color:var(--muted)}
+
+/* 11/12 — Reconocidos */
+.awards{display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+.award{position:relative;border-radius:20px;padding:30px 30px 28px;background:linear-gradient(170deg,rgba(255,201,74,.16),rgba(18,28,82,.8) 45%);border:1px solid rgba(255,201,74,.45);
+  box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.award .top{display:flex;align-items:center;gap:18px}
+.award .av{width:92px;height:92px}
+.award h4{font:38px/1 "Bebas Neue";letter-spacing:.03em}
+.award .area{font-size:17px;color:var(--gold);font-weight:500;margin-top:3px}
+.award .chip{display:inline-block;margin-top:6px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(92,225,255,.14);border:1px solid rgba(92,225,255,.45);color:var(--cyan)}
+.award blockquote{font:600 italic 22px/1.35 "Playfair Display",serif;margin-top:16px;color:var(--cream)}
+.award blockquote::before{content:"“";font-size:60px;line-height:0;vertical-align:-24px;color:var(--gold);margin-right:4px}
+.award .by{margin-top:18px;font-size:15px;color:var(--muted)}
+.trophy{position:absolute;top:-30px;right:22px;width:64px;height:64px;filter:drop-shadow(0 6px 14px rgba(255,180,40,.45))}
+
+/* 13 — Cierre */
+.s-end{display:grid;place-items:center;text-align:center}
+.s-end .neon{font-size:70px}
+.s-end .brand{font-size:170px}
+.s-end .next{margin-top:30px;font:30px/1 "Bebas Neue";letter-spacing:.24em;color:var(--cyan);text-shadow:0 0 12px rgba(92,225,255,.6)}
+.s-end .credits{margin-top:20px;font-size:20px;color:var(--muted)}
+
+.note-edit{position:absolute;right:110px;top:132px;font-size:14px;color:rgba(169,179,221,.55);letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div id="viewport">
+ <div id="stage">
+  <div class="bg">
+    <div id="stars"></div>
+    <div class="moon"></div>
+    <div class="beam l"></div><div class="beam r"></div>
+    <svg id="skyline" viewBox="0 0 1600 320" preserveAspectRatio="none"></svg>
+  </div>
+
+  <!-- 1 · INTRO -->
+  <section class="slide s-intro" data-seg="Apertura">
+    <div>
+      <div class="marquee anim" id="marquee">
+        <div class="neon the">The</div>
+        <div class="brand show-title" data-k="show.titulo"></div>
+        <div class="presents"><span data-k="show.nombre"></span> · <span data-k="show.mes"></span></div>
+      </div>
+      <div class="intro-meta anim" style="--i:2"><span>Episodio <b data-k="show.episodio" style="font-weight:400"></b></span><span>En vivo desde Google Meet</span></div>
+      <div class="host anim" style="--i:3"><span id="logo-intro"></span>Una producción de <b data-k="show.anfitrion"></b><br><span data-k="show.gerencia"></span></div>
+    </div>
+  </section>
+
+  <!-- 2 · AGENDA -->
+  <section class="slide" data-seg="Agenda">
+    <div class="head anim" style="margin-bottom:28px"><div class="kicker">Agenda · Pauta de transmisión</div><div class="title">El show de <em>esta noche</em></div></div>
+    <div class="rundown" id="rundown"></div>
+  </section>
+
+  <!-- 3 · BIENVENIDA -->
+  <section class="slide" data-seg="Bienvenida">
+    <div class="head anim"><div class="kicker">Bienvenida</div><div class="title">¡Buenas noches, <em>Gerencia!</em></div></div>
+    <div class="welcome">
+      <div class="monologue anim" style="--i:1"><div id="welcome-msg"></div><div class="rules" id="rules"></div></div>
+      <div class="screen anim" style="--i:2">
+        <div class="top"><span>Google Meet · Estudio Conectados</span><span class="live">● Rec</span></div>
+        <div class="tiles" id="tiles"></div>
+        <div class="cap">Nuestro público en el estudio</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · EQUIPO -->
+  <section class="slide" data-seg="Presentación del equipo">
+    <div class="head anim"><div class="kicker">Esta noche, en el escenario</div><div class="title">Conoce al <em>elenco</em></div></div>
+    <div class="team" id="team"></div>
+  </section>
+
+  <!-- 4 · ROMPEHIELO 1 -->
+  <section class="slide" data-seg="Rompehielos">
+    <div class="head anim"><div class="kicker">Rompehielos · Parte 1</div><div class="title">Notas de <em>agradecimiento</em></div>
+      <div class="sub">Como todo buen late night: unas palabras sinceras (o no tanto) para esas cosas de la oficina que merecen reconocimiento.</div></div>
+    <div class="notes" id="notes"></div>
+  </section>
+
+  <!-- 5 · ROMPEHIELO 2 -->
+  <section class="slide" data-seg="Rompehielos">
+    <div class="head anim"><div class="kicker">Rompehielos · Parte 2</div><div class="title">Adivina el <em>emoji</em></div>
+      <div class="sub">El público tiene 15 segundos por tarjeta. Haz clic para revelar la respuesta.</div></div>
+    <div class="emoji-grid" id="emojis"></div>
+  </section>
+
+  <!-- 6 · NUEVOS & ASCENSOS -->
+  <section class="slide s-shark" data-seg="Shark Tank Corporativo">
+    <div class="sea"><svg class="fins" viewBox="0 0 1600 120" preserveAspectRatio="none" id="fins"></svg></div>
+    <div class="head anim" style="margin-bottom:22px"><div class="kicker">Nuevos integrantes / Desarrollos internos</div><div class="title">Shark Tank <em>Corporativo</em></div>
+      <div class="sub" style="font-size:21px;margin-top:8px">Los nuevos emprendedores presentan su pitch a los tiburones. Clic en cada pitch para cerrar el trato.</div></div>
+    <div class="colh anim" style="--i:1;margin-bottom:14px"><i></i>Los pitches de la noche</div>
+    <div class="grid3" id="nuevos"></div>
+    <div class="colh anim" style="--i:5;color:var(--gold);margin:18px 0 14px"><i></i>Tratos cerrados · Desarrollos internos</div>
+    <div class="grid3" id="ascensos"></div>
+  </section>
+
+  <!-- 7 · ANIVERSARIOS -->
+  <section class="slide" data-seg="Aniversarios">
+    <div class="head anim"><div class="kicker">Aniversarios</div><div class="title">Paseo de <em>la fama</em></div>
+      <div class="sub">Quienes cumplen años de trayectoria con nosotros este mes.</div></div>
+    <div class="walk" id="walk"></div>
+  </section>
+
+  <!-- 8 · CUMPLEAÑOS -->
+  <section class="slide s-bday" data-seg="Cumpleaños · La ruleta del tiempo">
+    <div class="confetti" id="confetti"></div>
+    <div class="head anim" style="margin-bottom:24px"><div class="kicker">Cumpleaños del mes</div><div class="title">La ruleta <em>del tiempo</em></div>
+      <div class="sub" id="bday-sub"></div></div>
+    <div class="roulette">
+      <div class="wheel-wrap anim" style="--i:1">
+        <div class="pointer"></div>
+        <svg id="wheel" viewBox="0 0 500 500"></svg>
+        <button class="spin" id="spin">Girar</button>
+      </div>
+      <div class="rside">
+        <div class="result anim" style="--i:2" id="result"></div>
+        <div class="bdays" id="bdays"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · NOTICIAS -->
+  <section class="slide" data-seg="Noticias">
+    <div class="head anim" style="margin-bottom:28px"><div class="kicker">Noticiero de medianoche</div><div class="title">Las noticias <em>del mes</em></div></div>
+    <div class="newsdesk" id="news"></div>
+    <div class="ticker anim" style="--i:4"><div class="lbl">Última hora</div><div class="run" id="ticker"></div></div>
+  </section>
+
+  <!-- BUENAS PRÁCTICAS -->
+  <section class="slide" data-seg="Buenas prácticas">
+    <div class="head anim"><div class="kicker">Buenas prácticas</div><div class="title">Consejos <em>del productor</em></div>
+      <div class="sub">Tips y herramientas para trabajar mejor dentro de la gerencia.</div></div>
+    <div class="tips" id="tips"></div>
+  </section>
+
+  <!-- 10 · HA -->
+  <section class="slide" data-seg="Hiperautomatizaciones">
+    <div class="head anim" style="margin-bottom:28px"><div class="kicker">HA · Hiperautomatización</div><div class="title">El taller de <em>los robots</em></div></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="ha-list" id="ha"></div>
+  </section>
+
+  <!-- INICIATIVAS DEL EQUIPO -->
+  <section class="slide" data-seg="Iniciativas del equipo">
+    <div class="head anim"><div class="kicker">Iniciativas del equipo</div><div class="title">Detrás de <em>cámaras</em></div>
+      <div class="sub" id="inits-sub"></div></div>
+    <div class="carousel anim" style="--i:1">
+      <button class="car-btn l" id="car-prev" aria-label="Anterior">‹</button>
+      <div class="car-view"><div class="inits" id="inits"></div></div>
+      <button class="car-btn r" id="car-next" aria-label="Siguiente">›</button>
+    </div>
+    <div class="car-dots" id="car-dots"></div>
+  </section>
+
+  <!-- 11 · RECONOCIDOS -->
+  <section class="slide s-oscar" data-seg="Premios Late-Oscar">
+    <div class="carpet"></div>
+    <div class="head anim" style="margin-bottom:30px"><div class="kicker">Reconocidos · Los premios Late-Oscar</div><div class="title">Y el Late-Oscar <em>es para…</em></div>
+      <div class="legend" id="legend-int"></div></div>
+    <div class="awards" id="reconocidos" style="margin-top:44px"></div>
+  </section>
+
+  <!-- 12 · EQUIPO EXTENDIDO -->
+  <section class="slide s-oscar" data-seg="Premios Late-Oscar · Equipo extendido">
+    <div class="carpet"></div>
+    <div class="head anim" style="margin-bottom:30px"><div class="kicker">Late-Oscar · Equipo extendido</div><div class="title">Mejor <em>elenco de reparto</em></div>
+      <div class="legend" id="legend-ext"></div></div>
+    <div class="awards" id="extendido" style="margin-top:44px"></div>
+  </section>
+
+  <!-- 13 · CIERRE -->
+  <section class="slide s-end" data-seg="Despedida">
+    <div>
+      <div class="neon anim">Buenas noches</div>
+      <div class="brand anim" style="--i:1">¡Gracias!</div>
+      <div class="next anim" style="--i:2">Próximo episodio · <span data-k="show.proximo"></span></div>
+      <div class="credits anim" style="--i:3">Una producción de <span data-k="show.anfitrion"></span></div>
+    </div>
+  </section>
+
+  <div class="hud">
+    <div class="onair"><i></i>On Air</div>
+    <div class="ep"><b data-k="show.nombre"></b> · EP. <span data-k="show.episodio"></span> · <span data-k="show.mes"></span></div>
+    <div class="lower"><div class="tag" id="segnum">01</div><div class="name" id="segname">Apertura</div></div>
+    <div class="count"><b id="cur">01</b> / <span id="tot">13</span></div>
+    <button class="navbtn prev" id="prev" aria-label="Anterior">‹</button>
+    <button class="navbtn next" id="next" aria-label="Siguiente">›</button>
+  </div>
+  <div id="applause">Aplausos</div>
+  <div id="progress"></div>
+  <div id="curtain">
+    <div class="drape l"></div><div class="drape r"></div>
+    <div class="valance"></div>
+    <div class="curtain-hint">Presiona → para abrir el telón</div>
+  </div>
+  <div id="help"><div>
+    <h3>Controles del show</h3>
+    <kbd>→</kbd><kbd>Espacio</kbd> Siguiente<br>
+    <kbd>←</kbd> Anterior<br>
+    <kbd>F</kbd> Pantalla completa<br>
+    <kbd>A</kbd> Letrero de aplausos<br>
+    <kbd>T</kbd> Cerrar / abrir el telón<br>
+    <kbd>R</kbd> Girar la ruleta (en Cumpleaños)<br>
+    <kbd>Inicio</kbd><kbd>Fin</kbd> Primera / última<br>
+    <kbd>?</kbd> Mostrar / ocultar ayuda
+  </div></div>
+ </div>
+</div>
+
+<script>
+const DATOS = {
+  show: {
+    nombre: "Conectados",
+    titulo: "Late Night Balance",               // título principal de la portada (va después de "The")
+    gerencia: "Gerencia de Excelencia de Procesos",
+    mes: "Noviembre 2026",
+    episodio: 11,
+    anfitrion: "Transformación de Procesos TI y Normativos",   // equipo organizador de este mes
+    sigla: "TPTIN",
+    logo: "",                                  // opcional: "fotos/logo-equipo.png"
+    proximo: "Diciembre 2026"
+  },
+
+  bienvenida: {
+    mensaje: "Bienvenidas y bienvenidos a una nueva edición de Conectados, el único late night donde el público asiste en pantuflas.",
+    detalle: "Este mes nuestro equipo toma el escenario para repasar lo que pasó en la gerencia, celebrar a nuestra gente y, por supuesto, pasarlo bien.",
+    reglas: [
+      ["🎥", "Cámara encendida si puedes"],
+      ["🔇", "Micrófono en silencio"],
+      ["👏", "Aplausos por el chat"]
+    ]
+  },
+
+  equipo: [
+    { nombre: "Candy Casas-Cordero",     cargo: "Líder de equipo",          dato: "Conocida por: sus playlists para concentrarse", foto: "" },
+    { nombre: "Lorena Miranda",  cargo: "Jefa de proyectos",        dato: "Conocido por: tener un gráfico para todo",      foto: "" },
+    { nombre: "Henoch Soto",  cargo: "Ingeniero de Procesos Sr.", dato: "Conocida por: nombrar a cada bot",         foto: "" },
+    { nombre: "Soledad Gonzalez",    cargo: "Ingeniero de Procesos",        dato: "Conocido por: el café de las 16:00",            foto: "" },
+    { nombre: "Mauricio Osorio",     cargo: "Ingeniero de Procesos",            dato: "Conocida por: sus post-its de colores",         foto: "" },
+    { nombre: "Andrea Gonzalez",  cargo: "Ingeniero de Procesos",              dato: "Conocido por: encontrar el bug imposible",      foto: "" },
+    { nombre: "Pablo Belmar",   cargo: "Ingeniero de Procesos",             dato: "Conocida por: dailies de 14:59 minutos",        foto: "" },
+    { nombre: "Benjamín Jaramillo",    cargo: "Ingeniero de Procesos", dato: "Conocido por: dibujar diagramas en servilletas", foto: "" }
+  ],
+
+  // La pauta se arma sola; edita horarios y descripciones si quieres
+  pauta: [
+    ["10:00", "Bienvenida", "¡Buenas noches, Gerencia!"],
+    ["10:03", "Presentación del equipo", "Conoce al elenco"],
+    ["10:08", "Rompehielos", "Notas de agradecimiento y Adivina el emoji"],
+    ["10:18", "Nuevos integrantes / Desarrollos internos", "Shark Tank Corporativo"],
+    ["10:23", "Aniversarios", "Paseo de la fama"],
+    ["10:26", "Cumpleaños", "La ruleta del tiempo"],
+    ["10:30", "Noticias", "Noticiero de medianoche"],
+    ["10:36", "Buenas prácticas", "Consejos del productor"],
+    ["10:41", "Hiperautomatizaciones", "El taller de los robots"],
+    ["10:48", "Iniciativas del equipo", "Detrás de cámaras"],
+    ["10:53", "Reconocidos", "Los premios Late-Oscar"],
+    ["10:57", "Reconocidos equipo extendido", "Late-Oscar: mejor elenco de reparto"]
+  ],
+
+  notas: [
+    { para: "Gracias, reunión de lunes a las 9:00…", texto: "por enseñarnos que el café es un derecho, no un lujo." },
+    { para: "Gracias, Excel de 47 pestañas…", texto: "por mantenernos humildes y recordarnos por qué automatizamos." },
+    { para: "Gracias, bot de conciliación…", texto: "por trabajar a las 3 AM sin pedir horas extra ni vacaciones." },
+    { para: "Gracias, “¿me escuchan?”…", texto: "por ser la frase más dicha del año. Sí, te escuchamos." }
+  ],
+
+  emojis: [
+    { pista: "🐛🔨🚀",   respuesta: "Corregir un bug y pasar a producción" },
+    { pista: "📧📧📧😵", respuesta: "La bandeja de entrada un lunes" },
+    { pista: "🤖🧾✅",   respuesta: "Robot que valida facturas" },
+    { pista: "🎤🌙📺",   respuesta: "Late Night Conectados" }
+  ],
+
+  // Pregunta temática para los nuevos integrantes (se puede sobrescribir por persona con "pregunta").
+  // Deja respuesta:"" si la van a responder en vivo.
+  preguntaNuevos: "Tu pitch en 30 segundos: ¿por qué los tiburones deberían invertir en ti?",
+  nuevos: [
+    { nombre: "Sofía Herrera",  cargo: "Analista de procesos", equipo: "Mejora Continua",       respuesta: "", foto: "" },
+    { nombre: "Ignacio Pérez",  cargo: "Desarrollador RPA",    equipo: "Hiperautomatización",   respuesta: "", foto: "" },
+    { nombre: "Antonia Vargas", cargo: "Analista de datos",    equipo: "Gestión de Procesos",   respuesta: "", foto: "" }
+  ],
+  // Desarrollos internos: ascensos o cambios de rol dentro del banco
+  ascensos: [
+    { nombre: "Matías González", de: "Analista de datos",  a: "Analista senior",  foto: "" },
+    { nombre: "Fernanda Silva",  de: "Scrum Master",       a: "Agile Coach",      foto: "" }
+  ],
+
+  aniversarios: [
+    { nombre: "Valeria Bermudez",   anios: 1, area: "SinergIA" },
+    { nombre: "Henoch Soto",    anios: 5, area: "TPTIN" }
+  ],
+
+  cumpleanos: [
+    { nombre: "Ignaico Kem", dia: 7,  area: "SinergIA" },
+    { nombre: "Yanin Muñoz", dia: 26,  area: "Dream Team" }
+  ],
+
+  // La ruleta del tiempo: al girar, la persona elegida responde una de estas preguntas
+  ruletaPreguntas: [
+    "Si pudieras viajar a cualquier año, ¿a cuál irías y por qué?",
+    "¿Qué le dirías a tu yo de hace 10 años?",
+    "¿Qué canción te transporta directo a tu adolescencia?",
+    "¿Qué tecnología del futuro te gustaría tener hoy?",
+    "¿Cuál fue tu mejor cumpleaños?",
+    "¿Qué moda de otra época traerías de vuelta?",
+    "Si pudieras congelar el tiempo un día, ¿qué harías?",
+    "¿Qué juguete de tu infancia todavía extrañas?"
+  ],
+
+  noticias: {
+    principal: {
+      categoria: "Último minuto",
+      titular: "Titular principal de la noticia del mes",
+      bajada: "Reemplaza este texto con un resumen breve de la noticia nacional o de Bci más relevante del mes (2–3 líneas).",
+      fuente: "Fuente: [medio · fecha]",
+      foto: ""
+    },
+    otras: [
+      { categoria: "Bci",       titular: "Noticia corporativa del banco",   bajada: "Resumen breve de un anuncio interno o de prensa.", fuente: "Fuente: [medio · fecha]" },
+      { categoria: "Economía",  titular: "Dato económico del mes",          bajada: "IPC, tasa de política monetaria, dólar u otro indicador.", fuente: "Fuente: [medio · fecha]" },
+      { categoria: "País",      titular: "Noticia nacional destacada",      bajada: "Algo de la contingencia nacional que valga comentar.", fuente: "Fuente: [medio · fecha]" }
+    ],
+    ticker: [
+      "Reemplaza estos titulares cortos",
+      "Pueden ser noticias del área o del banco",
+      "También sirven datos curiosos del mes",
+      "O avisos: ¡no olvides la encuesta de clima!"
+    ]
+  },
+
+  buenasPracticas: [
+    { icono: "🎯", titulo: "Bloques de foco",          texto: "Reserva dos bloques de 90 minutos sin reuniones a la semana en tu calendario y protégelos como si fueran una reunión con el gerente.", herramienta: "Google Calendar" },
+    { icono: "✨", titulo: "Resume con Gemini",        texto: "Pídele a Gemini que resuma hilos largos de correo o documentos antes de una reunión y llega con el contexto listo.",                     herramienta: "Gemini" },
+    { icono: "🗺️", titulo: "Mapea antes de automatizar", texto: "Levanta el proceso actual (AS-IS) antes de pensar en un bot: lo que no se entiende, no se automatiza.",                              herramienta: "BPMN" },
+    { icono: "⌨️", titulo: "Atajos de Meet",           texto: "Ctrl + D silencia el micrófono y Ctrl + E apaga la cámara. Tu yo del lunes a las 9:00 te lo agradecerá.",                              herramienta: "Google Meet" }
+  ],
+
+  // estado: 0 Descubrimiento · 1 Diseño · 2 Desarrollo · 3 Piloto · 4 Producción
+  ha: [
+    { nombre: "Bot de conciliación bancaria", area: "Operaciones",       estado: 4, avance: 100, horas: 320 },
+    { nombre: "Lectura inteligente de documentos", area: "Riesgo",       estado: 3, avance: 80,  horas: 180 },
+    { nombre: "Asistente de reclamos con IA", area: "Servicio al cliente", estado: 2, avance: 55, horas: 240 },
+    { nombre: "Carga automática de reportes", area: "Finanzas",          estado: 1, avance: 25,  horas: 90 }
+  ],
+
+  // Iniciativas en las que trabaja el equipo organizador del mes
+  // Se muestran 3 a la vez; si hay más, la slide se vuelve carrusel (→ avanza el carrusel antes de pasar de slide).
+  // responsables: lista con uno o más nombres
+  iniciativas: [
+    { nombre: "Ley de Protección de Datos ST",   descripcion: "Levantamiento y documentación de los procesos críticos para tener una sola fuente de verdad.", responsables: ["Javiera Díaz", "Matías González"], fecha: "Dic 2026" },
+    { nombre: "Registro de Deuda Consolidada",   descripcion: "Dashboard con los KPIs de eficiencia de cada equipo, actualizado de forma automática.",          responsables: ["Matías González"], fecha: "Ene 2027" },
+    { nombre: "Decreto N°49 CHIP",               descripcion: "Espacio mensual para compartir aprendizajes, casos de éxito y nuevas ideas entre equipos.",     responsables: ["Fernanda Silva", "Javiera Díaz", "Tomás Rojas"], fecha: "Mar 2027" },
+    { nombre: "Ley de Protección de Datos RAT",  descripcion: "Espacio mensual para compartir aprendizajes, casos de éxito y nuevas ideas entre equipos.",     responsables: ["Fernanda Silva"], fecha: "Mar 2027" },
+    { nombre: "Modernización",                   descripcion: "Espacio mensual para compartir aprendizajes, casos de éxito y nuevas ideas entre equipos.",     responsables: ["Fernanda Silva", "Matías González"], fecha: "Mar 2027" }
+  ],
+
+  /* Reconocidos internos — atributo (uno de los 4) y conducta destacada:
+     · Actúo como dueño: Antepongo el éxito corporativo sobre el individual · Co-elaboro con otros respondiendo a los desafíos con agilidad · Construyo confianza · Actúo en base a los valores de Bci
+     · Inspiro a las personas a dar lo mejor: Facilito la liberación del talento · Soy protagonista y empodero · Empodero, delego y acompaño a otros en su desarrollo · Me conecto emocionalmente y gestiono la diversidad · Celebro los logros y doy reconocimiento
+     · Me obsesiono por el cliente: Genero experiencias sorprendentes y ágiles · Me conecto y practico la empatía con el cliente · Tomo decisiones con el cliente en el centro
+     · Logro objetivos ambiciosos: Alcanzo objetivos desafiantes · Me atrevo a ser ágil · Innovo y exploro nuevas opciones */
+  reconocidos: [
+    { nombre: "Catalina Reyes", area: "Gestión de Procesos", atributo: "Actúo como dueño",           conducta: "Construyo confianza",                     motivo: "Lideró el rediseño del proceso de onboarding coordinando a cinco áreas distintas.", nominadoPor: "Su equipo", foto: "" },
+    { nombre: "Felipe Araya",   area: "Operaciones",         atributo: "Me obsesiono por el cliente", conducta: "Tomo decisiones con el cliente en el centro", motivo: "Simplificó un trámite que hoy los clientes resuelven en la mitad del tiempo.",     nominadoPor: "Hiperautomatización", foto: "" },
+    { nombre: "Isidora Lagos",  area: "Mejora Continua",     atributo: "Logro objetivos ambiciosos", conducta: "Innovo y exploro nuevas opciones",          motivo: "Propuso usar IA para clasificar solicitudes y lo llevó de idea a piloto en un mes.", nominadoPor: "Camila Rojas", foto: "" }
+  ],
+
+  /* Equipo extendido (externos) — atributo (uno de los 4) y conducta destacada:
+     · Excelencia: Se preocupa por los detalles ejecutando con excelencia su trabajo · Potencia la colaboración y el aprendizaje entre áreas
+     · Apropiación: Toma como propias las necesidades de su equipo y de otros · Actúa con transparencia ganándose la confianza de sus pares
+     · Compromiso: Conoce a sus clientes y pares, demostrando interés por ellos · Se responsabiliza por las promesas hechas a clientes y compañeros
+     · Proactividad: Se anticipa generando acciones que facilitan el trabajo · Fomenta el trabajo en conjunto entre áreas */
+  extendido: [
+    { nombre: "Andrés Castillo", consultora: "Consultora A", rol: "Desarrollador RPA",  atributo: "Compromiso",   conducta: "Se responsabiliza por las promesas hechas", motivo: "Resolvió un incidente crítico un viernes a las 18:00 y aún llegó al asado.", foto: "" },
+    { nombre: "Paula Navarro",   consultora: "Consultora B", rol: "Analista QA",        atributo: "Excelencia",   conducta: "Se preocupa por los detalles",               motivo: "Diseñó la batería de pruebas que hoy usa todo el equipo.",                 foto: "" },
+    { nombre: "Cristóbal Vega",  consultora: "Consultora C", rol: "Ingeniero de datos", atributo: "Proactividad", conducta: "Se anticipa generando acciones que facilitan", motivo: "Optimizó los procesos nocturnos y bajó los tiempos a la mitad.",          foto: "" }
+  ]
+};
+
+const ATRIBUTOS_INT = { "Actúo como dueño":"#ffc94a", "Inspiro a las personas a dar lo mejor":"#ff7ae3", "Me obsesiono por el cliente":"#5ce1ff", "Logro objetivos ambiciosos":"#7dff9a" };
+const ATRIBUTOS_EXT = { "Excelencia":"#ffc94a", "Apropiación":"#ff7ae3", "Compromiso":"#5ce1ff", "Proactividad":"#7dff9a" };
+
+/* ================= Render ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const PALETTE = ["#3b4fd8","#c2367a","#e0742a","#1f9a8a","#7a45c9","#2f86d1","#b8402f","#3f8f3a"];
+function initials(n){ return n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+function color(n){ let h=0; for(const c of n) h=(h*31+c.charCodeAt(0))>>>0; return PALETTE[h%PALETTE.length]; }
+function avatar(p){
+  const img = p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nombre)}" onerror="this.remove()">` : "";
+  return `<div class="av" style="--c:${color(p.nombre)}">${initials(p.nombre)}${img}</div>`;
+}
+const TROPHY = `<svg class="trophy" viewBox="0 0 64 64"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".5" stop-color="#ffc94a"/><stop offset="1" stop-color="#e08a10"/></linearGradient></defs><path d="M18 6h28v12c0 9-6 16-14 16S18 27 18 18z" fill="url(#tg)"/><path d="M18 10H8c0 9 5 14 11 14M46 10h10c0 9-5 14-11 14" fill="none" stroke="#ffc94a" stroke-width="3.5"/><rect x="28" y="33" width="8" height="10" fill="#e9a52a"/><rect x="20" y="43" width="24" height="6" rx="2" fill="url(#tg)"/><rect x="16" y="49" width="32" height="8" rx="2" fill="#2a1a06" stroke="#ffc94a" stroke-width="2"/></svg>`;
+
+// Textos simples
+document.querySelectorAll("[data-k]").forEach(el=>{
+  const v = el.dataset.k.split(".").reduce((o,k)=>o?.[k], DATOS);
+  el.textContent = v ?? "";
+});
+
+// Logo del equipo organizador (opcional)
+if (DATOS.show.logo) $("#logo-intro").innerHTML = `<img class="logo" src="${esc(DATOS.show.logo)}" alt="" onerror="this.remove()">`;
+
+// Bienvenida
+const B = DATOS.bienvenida;
+$("#welcome-msg").innerHTML = `<p>${esc(B.mensaje)}</p><p>${esc(B.detalle)}</p>`;
+$("#rules").innerHTML = B.reglas.map(([e,t])=>`<div class="rule"><b>${e}</b>${esc(t)}</div>`).join("");
+const publico = [...DATOS.equipo.map(p=>p.nombre)].slice(0,8).concat(["Tú"]);
+$("#tiles").innerHTML = publico.map((n,i)=>`<div class="tile ${i===0?"talk":""}" style="--c:${color(n)}">${n==="Tú"?"TÚ":initials(n)}<span>${esc(n.split(" ")[0])}</span></div>`).join("");
+
+// Equipo
+$("#team").innerHTML = DATOS.equipo.map((p,i)=>`
+  <div class="member anim" style="--i:${i+1}">${avatar(p)}
+    <div><h4>${esc(p.nombre)}</h4><p>${esc(p.cargo)}</p><small>${esc(p.dato)}</small></div></div>`).join("");
+
+// Pauta
+$("#rundown").innerHTML = DATOS.pauta.map(([t,l,s],i)=>`
+  <div class="cue anim" style="--i:${(i%Math.ceil(DATOS.pauta.length/2))+1}"><div class="t">${esc(t)}</div><div class="n">${String(i+1).padStart(2,"0")}</div>
+  <div class="l">${esc(l)}<small>${esc(s)}</small></div></div>`).join("");
+// orden en dos columnas (de arriba hacia abajo)
+$("#rundown").style.gridAutoFlow="column";
+$("#rundown").style.gridTemplateRows=`repeat(${Math.ceil(DATOS.pauta.length/2)},auto)`;
+
+// Notas
+const rots=[-3,2,-1.5,3];
+$("#notes").innerHTML = DATOS.notas.map((n,i)=>`
+  <div class="note anim" style="--i:${i+1};--r:${rots[i%4]}deg"><div class="to">${esc(n.para)}</div><div class="tx">${esc(n.texto)}</div></div>`).join("");
+
+// Emojis
+$("#emojis").innerHTML = DATOS.emojis.map((e,i)=>`
+  <div class="flip anim" style="--i:${i+1}"><div class="in">
+    <div class="face front"><div class="num">Tarjeta ${i+1}</div><div class="emo">${esc(e.pista)}</div><div class="hint">Clic para revelar</div></div>
+    <div class="face back"><div class="num">Respuesta</div><div class="ans">${esc(e.respuesta)}</div></div>
+  </div></div>`).join("");
+document.querySelectorAll(".flip").forEach(f=>f.addEventListener("click",()=>f.classList.toggle("on")));
+
+// Nuevos / ascensos
+$("#nuevos").innerHTML = DATOS.nuevos.map((p,i)=>`
+  <div class="guest pitch anim" style="--i:${i+2}"><span class="stamp">¡Trato hecho!</span>${avatar(p)}<div style="flex:1"><div class="pitchno">Pitch #${String(i+1).padStart(2,"0")}</div><h4>${esc(p.nombre)}</h4><p>${esc(p.cargo)}</p><small>Se une a: ${esc(p.equipo)}</small>
+  <div class="qa"><div class="q">${esc(p.pregunta||DATOS.preguntaNuevos)}</div><div class="r ${p.respuesta?"":"live"}">${p.respuesta?esc(p.respuesta):"Respuesta en vivo… 🎤"}</div></div></div></div>`).join("");
+$("#ascensos").innerHTML = DATOS.ascensos.map((p,i)=>`
+  <div class="guest promo anim" style="--i:${i+6}"><span class="stamp">Deal</span>${avatar(p)}<div><h4>${esc(p.nombre)}</h4>
+  <div class="path"><span class="from">${esc(p.de)}</span><span class="arrow">→</span><span class="to">${esc(p.a)}</span></div></div></div>`).join("");
+
+// Aniversarios
+const STAR = `<svg viewBox="0 0 220 210"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".55" stop-color="#ffc94a"/><stop offset="1" stop-color="#f09a1a"/></linearGradient></defs>
+  <polygon points="110,6 137,78 214,80 153,127 175,202 110,158 45,202 67,127 6,80 83,78" fill="url(#sg)" stroke="#fff4cf" stroke-width="3" stroke-linejoin="round"/></svg>`;
+$("#walk").innerHTML = [...DATOS.aniversarios].sort((a,b)=>b.anios-a.anios).map((p,i)=>`
+  <div class="fame anim" style="--i:${i+1}"><div class="st">${STAR}<div class="yrs"><div><b>${p.anios}</b><span>${p.anios===1?"año":"años"}</span></div></div></div>
+  <h4>${esc(p.nombre)}</h4><p>${esc(p.area)}</p></div>`).join("");
+
+// Cumpleaños
+const mesCorto = (DATOS.show.mes.split(" ")[0]||"").slice(0,3).toUpperCase();
+const BD = [...DATOS.cumpleanos].sort((a,b)=>a.dia-b.dia);
+$("#bday-sub").textContent = `${BD.length} cumpleañeros este mes. Gira la ruleta (clic o tecla R): quien salga responde una pregunta sobre el tiempo.`;
+$("#bdays").innerHTML = BD.map((p,i)=>`
+  <div class="bday anim" data-i="${i}" style="--i:${i+3}"><div class="cal"><div class="m">${mesCorto}</div><div class="d">${String(p.dia).padStart(2,"0")}</div></div>
+  <div><h4>${esc(p.nombre)}</h4><p>${esc(p.area)}</p></div></div>`).join("");
+
+// La ruleta del tiempo
+const RESULT_IDLE = `<div class="lbl">La ruleta del tiempo</div><h4>¿Quién será?</h4><div class="idle">Gira la ruleta: la persona elegida responde una pregunta sobre el tiempo… y después todos le cantamos.</div>`;
+$("#result").innerHTML = RESULT_IDLE;
+(function wheel(){
+  const n = BD.length, seg = 360/n, C = 250, R = 232;
+  const pt = (a,r) => [C + r*Math.sin(a*Math.PI/180), C - r*Math.cos(a*Math.PI/180)];
+  const COLS = ["#c41d33","#1a2766","#ffc94a","#0e7c86","#7a45c9","#e0742a"];
+  let segs = "", labels = "";
+  BD.forEach((p,i)=>{
+    const a0=i*seg, a1=(i+1)*seg, [x0,y0]=pt(a0,R), [x1,y1]=pt(a1,R), col=COLS[i%COLS.length];
+    segs += `<path d="M${C} ${C} L${x0} ${y0} A${R} ${R} 0 ${seg>180?1:0} 1 ${x1} ${y1} Z" fill="${col}" stroke="#0a1030" stroke-width="2"/>`;
+    const mid=a0+seg/2, [tx,ty]=pt(mid,R*0.62);
+    labels += `<text transform="translate(${tx} ${ty}) rotate(${mid-90})" text-anchor="middle" dominant-baseline="middle" fill="${col==="#ffc94a"?"#0a1030":"#fff4dc"}" style="font:24px 'Bebas Neue';letter-spacing:.06em">${esc(p.nombre.split(" ")[0])} · ${String(p.dia).padStart(2,"0")}</text>`;
+  });
+  let rim = `<circle cx="${C}" cy="${C}" r="244" fill="none" stroke="#ffc94a" stroke-width="10"/>`;
+  for(let k=0;k<28;k++){ const [bx,by]=pt(k*360/28,244); rim += `<circle class="bl ${k%2?"o":""}" cx="${bx}" cy="${by}" r="4" fill="#fff2c4"/>`; }
+  $("#wheel").innerHTML = `<g class="rot" id="rot">${segs}${labels}</g>${rim}<circle cx="${C}" cy="${C}" r="62" fill="#0a1030"/>`;
+
+  let rot = 0, spinning = false, last = null, qIdx = 0;
+  const done = new Set();
+  const preguntas = [...DATOS.ruletaPreguntas].sort(()=>Math.random()-.5);
+  const tiles = () => [...document.querySelectorAll("#bdays .bday")];
+  window.spinWheel = function(){
+    if (spinning || !n) return;
+    let pool = BD.map((_,i)=>i).filter(i=>!done.has(i));
+    if (!pool.length){ done.clear(); tiles().forEach(t=>t.classList.remove("done","pick")); pool = BD.map((_,i)=>i); }
+    const i = pool[Math.floor(Math.random()*pool.length)];
+    const center = (i+.5)*seg + (Math.random()-.5)*seg*.6;
+    const curMod = ((rot%360)+360)%360;
+    rot += 360*6 + (((360-center)%360 - curMod) + 360) % 360;
+    spinning = true; $("#spin").disabled = true; $("#spin").blur();
+    $("#result").innerHTML = `<div class="lbl">La ruleta del tiempo</div><h4>Girando…</h4><div class="idle">Tic, tac, tic, tac…</div>`;
+    $("#rot").style.transform = `rotate(${rot}deg)`;
+    setTimeout(()=>{
+      if (last!==null){ tiles()[last].classList.remove("pick"); tiles()[last].classList.add("done"); }
+      done.add(i); last = i; tiles()[i].classList.add("pick");
+      const p = BD[i], q = preguntas[qIdx++ % preguntas.length];
+      const r = $("#result"); r.classList.remove("pop"); void r.offsetWidth; r.classList.add("pop");
+      r.innerHTML = `<div class="lbl">La ruleta eligió a · ${String(p.dia).padStart(2,"0")} ${mesCorto}</div><h4>${esc(p.nombre)}</h4><p>${esc(q)}</p>`;
+      spinning = false; $("#spin").disabled = false;
+    }, 5600);
+  };
+  $("#spin").addEventListener("click", spinWheel);
+})();
+
+// Noticias
+const N = DATOS.noticias;
+$("#news").innerHTML = `
+  <div class="lead anim" style="--i:1"><div class="img">${N.principal.foto?`<img src="${esc(N.principal.foto)}" alt="">`:"Imagen de la noticia"}</div>
+    <div class="txt"><span class="breaking">${esc(N.principal.categoria)}</span><h3>${esc(N.principal.titular)}</h3><p>${esc(N.principal.bajada)}</p><div class="src">${esc(N.principal.fuente)}</div></div></div>
+  <div class="side">${N.otras.map((s,i)=>`<div class="story anim" style="--i:${i+2}"><div class="cat">${esc(s.categoria)}</div><h4>${esc(s.titular)}</h4><p>${esc(s.bajada)}</p><div class="src">${esc(s.fuente)}</div></div>`).join("")}</div>`;
+const tick = N.ticker.map(t=>`<span>${esc(t)}</span>`).join("");
+$("#ticker").innerHTML = tick + tick;
+
+// HA
+const ETAPAS = ["Descubrimiento","Diseño","Desarrollo","Piloto","Producción"];
+const H = DATOS.ha;
+const totalHoras = H.reduce((s,x)=>s+(+x.horas||0),0);
+$("#kpis").innerHTML = [
+  [H.length, "Iniciativas activas"],
+  [H.filter(x=>x.estado===4).length, "En producción"],
+  [H.filter(x=>x.estado>=1&&x.estado<=3).length, "En diseño, desarrollo o piloto"],
+  [totalHoras.toLocaleString("es-CL"), "Horas/mes liberadas (estimado)"]
+].map(([v,l],i)=>`<div class="kpi anim" style="--i:${i+1}"><b>${v}</b><span>${l}</span></div>`).join("");
+$("#ha").innerHTML = H.map((x,i)=>`
+  <div class="ha anim" style="--i:${i+5}">
+    <div><h4>${esc(x.nombre)}</h4><small>${esc(x.area)}</small></div>
+    <div class="pipe">${ETAPAS.map((e,k)=>`<div class="stp ${k<x.estado?"done":k===x.estado?"cur":""}">${e}</div>`).join("")}</div>
+    <div><div class="bar"><i data-w="${x.avance}"></i></div><div class="barlbl">${x.avance}% de avance</div></div>
+    <div class="save"><b>${x.horas} h</b><span>al mes</span></div>
+  </div>`).join("");
+
+// Buenas prácticas
+$("#tips").innerHTML = DATOS.buenasPracticas.map((t,i)=>`
+  <div class="tip anim" style="--i:${i+1}"><div class="ico">${esc(t.icono)}</div><div class="n">Consejo ${String(i+1).padStart(2,"0")}</div>
+  <h4>${esc(t.titulo)}</h4><p>${esc(t.texto)}</p>${t.herramienta?`<span class="tool">${esc(t.herramienta)}</span>`:""}</div>`).join("");
+
+// Iniciativas del equipo (carrusel de 3 tarjetas visibles)
+$("#inits-sub").textContent = `En qué está trabajando el equipo ${DATOS.show.sigla || DATOS.show.anfitrion} en este momento.`;
+$("#inits").innerHTML = DATOS.iniciativas.map((x,i)=>{
+  const resp = [].concat(x.responsables ?? x.responsable ?? []).filter(Boolean);
+  return `<div class="init"><div class="clap"></div><div class="bd">
+    <h4>${esc(x.nombre)}</h4><p>${esc(x.descripcion)}</p>
+    <div class="crew"><div class="lbl"><span>${resp.length>1?"Responsables":"Responsable"}</span>${x.fecha?`<span>Estreno: <b>${esc(x.fecha)}</b></span>`:""}</div>
+      <div class="who">${resp.map(n=>`<span class="chip">${avatar({nombre:n})}${esc(n)}</span>`).join("")}</div></div>
+  </div></div>`;}).join("");
+const car = (()=>{
+  const VIS = 3, n = DATOS.iniciativas.length, max = Math.max(0, n - VIS);
+  let pos = 0;
+  const track = $("#inits"), prev = $("#car-prev"), nxt = $("#car-next"), dots = $("#car-dots");
+  if (!max) { prev.style.display = nxt.style.display = "none"; }
+  const pages = Math.ceil(n / VIS);   // cada "página" muestra tarjetas que aún no se han visto
+  const pagePos = k => Math.min(k*VIS, max);
+  dots.innerHTML = max ? Array.from({length:pages},(_,k)=>`<i data-k="${k}"></i>`).join("") : "";
+  function set(p){
+    pos = Math.max(0, Math.min(max, p));
+    const card = track.children[0];
+    const step = card ? card.offsetWidth + 30 : 0;
+    track.style.transform = `translateX(${-pos*step}px)`;
+    prev.disabled = pos===0; nxt.disabled = pos===max;
+    [...dots.children].forEach((d,k)=>d.classList.toggle("on", pagePos(k)===pos));
+  }
+  const fwd  = () => set(pos + VIS), back = () => set(pos === max && max % VIS ? Math.floor(max/VIS)*VIS : pos - VIS);
+  prev.onclick = e => { e.stopPropagation(); back(); };
+  nxt.onclick  = e => { e.stopPropagation(); fwd(); };
+  dots.onclick = e => { if (e.target.dataset.k) set(pagePos(+e.target.dataset.k)); };
+  set(0);
+  return { slide: track.closest(".slide"), fwd(){ if(pos<max){fwd();return true;} return false; },
+           back(){ if(pos>0){back();return true;} return false; }, reset(){ set(0); } };
+})();
+
+// Reconocidos
+function legend(sel, attrs, lista){
+  const usados = new Set(lista.map(p=>p.atributo));
+  $(sel).innerHTML = Object.entries(attrs).map(([n,c])=>`<span class="${usados.has(n)?"on":""}" style="--a:${c}">${esc(n)}</span>`).join("");
+}
+const attrHTML = (p, attrs) => p.atributo ? `<span class="attr" style="--a:${attrs[p.atributo]||"#ffc94a"}">${esc(p.atributo)}</span>${p.conducta?`<div class="conducta">${esc(p.conducta)}</div>`:""}` : "";
+legend("#legend-int", ATRIBUTOS_INT, DATOS.reconocidos);
+legend("#legend-ext", ATRIBUTOS_EXT, DATOS.extendido);
+const envelope = p => `<div class="env"><div class="seal">${esc(DATOS.show.sigla || "LN")}</div><div class="cat">Late-Oscar en la categoría<b>${esc(p.atributo || "Estrella de la noche")}</b></div><div class="tap">Clic para abrir el sobre</div></div>`;
+$("#reconocidos").innerHTML = DATOS.reconocidos.map((p,i)=>`
+  <div class="award anim" style="--i:${i+1}">${TROPHY}${envelope(p)}<div class="top">${avatar(p)}<div><h4>${esc(p.nombre)}</h4><div class="area">${esc(p.area)}</div></div></div>
+  ${attrHTML(p, ATRIBUTOS_INT)}<blockquote>${esc(p.motivo)}</blockquote><div class="by">Nominado por: ${esc(p.nominadoPor)}</div></div>`).join("");
+$("#extendido").innerHTML = DATOS.extendido.map((p,i)=>`
+  <div class="award anim" style="--i:${i+1}">${TROPHY}${envelope(p)}<div class="top">${avatar(p)}<div><h4>${esc(p.nombre)}</h4><div class="area">${esc(p.rol)}</div><span class="chip">${esc(p.consultora)}</span></div></div>
+  ${attrHTML(p, ATRIBUTOS_EXT)}<blockquote>${esc(p.motivo)}</blockquote></div>`).join("");
+document.querySelectorAll(".award").forEach(a=>a.addEventListener("click",()=>a.classList.toggle("open")));
+document.querySelectorAll(".pitch").forEach(a=>a.addEventListener("click",()=>a.classList.toggle("deal")));
+
+// Shark Tank: olas y aletas
+(function sea(){
+  const wave = (y, amp, fill) => { let d = `M-200 ${y}`; for (let x=-200, s=1; x<2000; x+=100, s=-s) d += ` Q${x+50} ${y-amp*s} ${x+100} ${y}`; return `<path class="wave" d="${d} L2000 120 L-200 120 Z" fill="${fill}"/>`; };
+  const fins = [[14,0],[19,-7],[23,-15]].map(([d,dl],k)=>`<g class="fin" style="animation-duration:${d}s;animation-delay:${dl}s"><path d="M0 76 C 14 62, 24 34, 46 20 C 41 42, 45 60, 58 76 Z" fill="#8fa6d2" opacity="${.9-k*.15}"/></g>`).join("");
+  $("#fins").innerHTML = wave(70, 8, "rgba(20,110,150,.35)") + fins + wave(80, 10, "rgba(10,90,130,.6)");
+})();
+
+/* ================= Fondo ================= */
+let seed = 7; const rnd = () => (seed = (seed*16807)%2147483647)/2147483647;
+$("#stars").innerHTML = Array.from({length:140},()=>{
+  const s = rnd()<.15?3:2;
+  return `<i class="star" style="left:${rnd()*1600}px;top:${rnd()*560}px;width:${s}px;height:${s}px;--d:${2+rnd()*4}s;--dl:${-rnd()*5}s"></i>`;
+}).join("");
+(function skyline(){
+  let x=0, svg="";
+  const layers=[{h:[120,230],c:"#0f1a4a",lit:.12,op:.85},{h:[60,200],c:"#0a1236",lit:.28,op:1}];
+  layers.forEach(L=>{
+    x=-20;
+    while(x<1620){
+      const w=40+rnd()*90, h=L.h[0]+rnd()*(L.h[1]-L.h[0]), y=320-h;
+      svg+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${L.c}" opacity="${L.op}"/>`;
+      if(rnd()<.25) svg+=`<rect x="${x+w/2-1.5}" y="${y-26}" width="3" height="26" fill="${L.c}"/><circle cx="${x+w/2}" cy="${y-28}" r="2.5" fill="#ff3b4f" class="win" style="animation-duration:${2+rnd()*2}s"/>`;
+      for(let wy=y+12; wy<312; wy+=18) for(let wx=x+8; wx<x+w-10; wx+=14){
+        if(rnd()<L.lit){
+          const tw = rnd()<.08 ? ` class="win" style="animation-delay:${-rnd()*7}s"` : "";
+          svg+=`<rect x="${wx}" y="${wy}" width="6" height="9" fill="${rnd()<.8?"#ffd27a":"#9fe8ff"}" opacity="${.5+rnd()*.5}"${tw}/>`;
+        }
+      }
+      x+=w+(rnd()<.3?6:0);
+    }
+  });
+  $("#skyline").innerHTML=svg;
+})();
+
+// Bombillas de la marquesina
+function bulbs(){
+  const m=$("#marquee"); m.querySelectorAll(".bulb").forEach(b=>b.remove());
+  const W=1120, Hh=m.offsetHeight||420, step=44, pts=[];
+  const inset=-3;
+  for(let x=24;x<=W-24;x+=step){pts.push([x,inset]);pts.push([x,Hh-inset]);}
+  for(let y=24+step;y<=Hh-24-step/2;y+=step){pts.push([inset,y]);pts.push([W-inset,y]);}
+  m.insertAdjacentHTML("beforeend",pts.map((p,i)=>`<i class="bulb ${i%4<2?"":"o"}" style="left:${p[0]}px;top:${p[1]}px"></i>`).join(""));
+}
+bulbs(); document.fonts?.ready.then(bulbs);
+
+// Confeti
+$("#confetti").innerHTML = Array.from({length:70},()=>{
+  const c=["#ffc94a","#ff4fd8","#5ce1ff","#ff3b4f","#fff4dc","#7dff9a"][Math.floor(rnd()*6)];
+  return `<i style="left:${rnd()*1600}px;background:${c};animation-duration:${5+rnd()*6}s;animation-delay:${-rnd()*10}s;transform:rotate(${rnd()*360}deg)"></i>`;
+}).join("");
+
+/* ================= Navegación ================= */
+const slides=[...document.querySelectorAll(".slide")];
+let cur=0;
+$("#tot").textContent=String(slides.length).padStart(2,"0");
+function go(n){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  if(n>0) $("#curtain").classList.add("open");
+  slides[cur].classList.remove("active");
+  cur=n; const s=slides[cur];
+  // reiniciar animaciones
+  s.querySelectorAll(".anim").forEach(a=>{a.style.animation="none";a.offsetHeight;a.style.animation="";});
+  s.classList.add("active");
+  if(s===car.slide) car.reset();
+  s.querySelectorAll(".bar i").forEach(b=>{b.style.width="0";requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=b.dataset.w+"%"));});
+  $("#cur").textContent=String(cur+1).padStart(2,"0");
+  $("#segnum").textContent=String(cur+1).padStart(2,"0");
+  $("#segname").textContent=s.dataset.seg;
+  $("#progress").style.width=((cur+1)/slides.length*100)+"%";
+  document.body.classList.toggle("dim", cur!==0 && cur!==slides.length-1);
+  history.replaceState(null,"","#"+(cur+1));
+}
+// Telón: cerrado al cargar; el primer "siguiente" lo abre
+const curtain = $("#curtain");
+const curtainOpen = () => curtain.classList.contains("open");
+function openCurtain(){ curtain.classList.add("open"); setTimeout(()=>{ if(cur===0) go(0); }, 900); }
+function next(){ if(cur===0 && !curtainOpen()) openCurtain(); else if(slides[cur]===car.slide && car.fwd()) return; else go(cur+1); }
+function prev(){ if(slides[cur]===car.slide && car.back()) return; go(cur-1); }
+curtain.addEventListener("click", openCurtain);
+document.addEventListener("keydown",e=>{
+  if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();next();}
+  else if(e.key==="t"||e.key==="T"){ curtainOpen() ? curtain.classList.remove("open") : openCurtain(); }
+  else if((e.key==="r"||e.key==="R") && slides[cur].contains($("#wheel"))){ spinWheel(); }
+  else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();prev();}
+  else if(e.key==="Home")go(0);
+  else if(e.key==="End")go(slides.length-1);
+  else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();}
+  else if(e.key==="a"||e.key==="A"){$("#applause").classList.toggle("on");}
+  else if(e.key==="?"||e.key==="h"||e.key==="H"){$("#help").classList.toggle("on");}
+  else if(e.key==="Escape"){$("#help").classList.remove("on");$("#applause").classList.remove("on");}
+});
+$("#prev").onclick=prev;
+$("#next").onclick=next;
+let tx=null;
+addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener("touchend",e=>{if(tx==null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){d<0?next():prev();}tx=null;});
+
+function fit(){
+  const s=Math.min(innerWidth/1600,innerHeight/900);
+  $("#stage").style.transform=`translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize",fit); fit();
+go((parseInt(location.hash.slice(1))||1)-1);
+if (cur > 0) curtain.classList.add("open");
+</script>
+</body>
+</html>
